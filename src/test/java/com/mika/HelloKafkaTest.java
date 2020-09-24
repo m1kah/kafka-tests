@@ -63,4 +63,13 @@ public class HelloKafkaTest {
         assertNotNull(record);
         System.out.println(record.value());
     }
+
+    @Test
+    public void consumePings() {
+        var producerProps = KafkaTestUtils.producerProps(embeddedKafkaBroker);
+        var producerFactory = new DefaultKafkaProducerFactory<String, String>(producerProps);
+        var template = new KafkaTemplate<String, String>(producerFactory);
+
+        template.send("ping", "PING!");
+    }
 }
