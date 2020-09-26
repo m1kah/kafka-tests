@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -32,7 +31,8 @@ import static org.mockito.ArgumentMatchers.any;
         bootstrapServersProperty = "spring.kafka.bootstrap-servers",
         topics = {
                 "hello-kafka",
-                "greetings"
+                "greetings",
+                "notes"
         }
 )
 @DirtiesContext
