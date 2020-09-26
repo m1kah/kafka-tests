@@ -18,6 +18,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Duration;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -41,25 +42,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DirtiesContext
 public class HelloKafkaTest {
     @Autowired
-    private EmbeddedKafkaBroker embeddedKafkaBroker;
+    EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Test
     public void produceAndConsume() throws Exception {
-        var consumerProps = KafkaTestUtils.consumerProps("test", "false", embeddedKafkaBroker);
-        var consumerFactory = new DefaultKafkaConsumerFactory<String, String>(consumerProps);
-        var containerProps = new ContainerProperties("hello-kafka");
-        var container = new KafkaMessageListenerContainer<String, String>(consumerFactory, containerProps);
-        var records = new LinkedBlockingDeque<ConsumerRecord<String, String>>();
-        container.setupMessageListener((MessageListener<String, String>) records::add);
-        container.start();
-        ContainerTestUtils.waitForAssignment(container, embeddedKafkaBroker.getPartitionsPerTopic());
+        var testConsumer = new TestConsumer<String, String>(embeddedKafkaBroker, "hello-kafka");
 
         var producerProps = KafkaTestUtils.producerProps(embeddedKafkaBroker);
         var producerFactory = new DefaultKafkaProducerFactory<String, String>(producerProps);
         var template = new KafkaTemplate<String, String>(producerFactory);
 
         template.send("hello-kafka", "HELLO!");
-        var record = records.poll(1, TimeUnit.SECONDS);
+        var record = testConsumer.poll(Duration.ofSeconds(1));
         assertNotNull(record);
         System.out.println(record.value());
     }
@@ -68,7 +62,7 @@ public class HelloKafkaTest {
     public void consumePings() {
         var producerProps = KafkaTestUtils.producerProps(embeddedKafkaBroker);
         var producerFactory = new DefaultKafkaProducerFactory<String, String>(producerProps);
-        var template = new KafkaTemplate<String, String>(producerFactory);
+        var template = new KafkaTemplate<>(producerFactory);
 
         template.send("ping", "PING!");
     }

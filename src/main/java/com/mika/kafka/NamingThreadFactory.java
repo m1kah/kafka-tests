@@ -3,7 +3,7 @@ package com.mika.kafka;
 import java.util.concurrent.ThreadFactory;
 
 public class NamingThreadFactory implements ThreadFactory{
-    private String name;
+    final String name;
     private int counter;
 
     NamingThreadFactory(String name) {
